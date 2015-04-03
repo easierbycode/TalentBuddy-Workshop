@@ -30,8 +30,7 @@ app.use(passport.session());
 
 var ensureAuthentication = function() {
     return function auth(req, res, next) {
-        console.log(req.isAuthenticated());
-        if (!(req.session && req.session.user)) {
+        if (!req.isAuthenticated()) {
             return res.sendStatus(403);
         }
         next();
@@ -78,9 +77,10 @@ app.get('/api/users/:userId', function(req, res) {
 
 
 app.put('/api/users/:userId', ensureAuthentication(), function(req, res) {
-    console.log(req);
     var User   = conn.model('User');
-
+    if (req.user.id !== req.params.userId) {
+        return res.sendStatus(403);
+    }
     User.findOneAndUpdate({ id: req.params.userId }, { password: req.body.password }, function(err, user) {
         console.log(user);
         return res.sendStatus(200);
