@@ -125,9 +125,8 @@ app.post('/api/tweets', function(req, res) {
 
     var tweet = req.body.tweet;
 
-    tweet.id = shortId.generate();
     tweet.created = Date.now() / 1000 | 0;
-    fixtures.tweets.push(tweet);
+    
     res.send({tweet: tweet });
 
 });
