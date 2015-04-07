@@ -6,7 +6,6 @@ var express      = require('express'),
     fixtures     = require('./fixtures'),
     bodyParser   = require('body-parser'),
     cookieParser = require('cookie-parser'),
-    shortId      = require('shortid'),
     _            = require('lodash'),
     passport     = require('./auth'),
     conn         = require('./db');
@@ -39,8 +38,6 @@ var ensureAuthentication = function() {
 };
 
 
-
-
 app.get('/api/tweets', function(req, res){
     if(!req.query.userId) {
         return res.sendStatus(400);
@@ -63,17 +60,7 @@ app.get('/api/users/:userId', function(req, res) {
         }
         res.status(200).json({ user: user});
     });
-
-    /*var user = _.find(fixtures.users, 'id', req.params.userId);
-
-    if(!user) {
-        return res.sendStatus(404)
-    }
-    res.send({ user: user});*/
-
 });
-
-
 
 
 app.put('/api/users/:userId', ensureAuthentication(), function(req, res) {
@@ -105,29 +92,22 @@ app.post('/api/users', function(req, res)  {
         });
     });
 
-
-    /*if(_.find(fixtures.users, 'id', user.id)) {
-        return res.sendStatus(409);
-    }
-    user.followingIds = [];
-    fixtures.users.push(user);
-    req.login(user, function(err) {
-        if (err) {
-            return err;
-        }
-        console.log(req.session);
-        res.sendStatus(200);
-    });*/
 });
 
 
-app.post('/api/tweets', function(req, res) {
-
-    var tweet = req.body.tweet;
-
-    tweet.created = Date.now() / 1000 | 0;
-    
-    res.send({tweet: tweet });
+app.post('/api/tweets',ensureAuthentication(), function(req, res) {
+    var Tweet = conn.model('Tweet');
+    var newTweet = new Tweet({
+        text: req.body.tweet.text,
+        created : Date.now() / 1000 | 0,
+        userId : req.user.id
+    });
+    newTweet.save(function(err, newTweet) {
+        if (err) {
+            return res.status(500).json('Error occurred');
+        }
+        res.json({tweet: newTweet});
+    });
 
 });
 
@@ -157,7 +137,6 @@ app.delete('/api/tweets/:tweetId', ensureAuthentication(), function(req, res) {
 });
 
 app.post('/api/auth/login', function(req, res) {
-    //console.log(req.body);
     passport.authenticate('local', function(err, user, info) {
         if(err) {
             return res.sendStatus(500);
@@ -176,7 +155,6 @@ app.post('/api/auth/login', function(req, res) {
 
 app.post('/api/auth/logout', function(req, res) {
     req.logout();
-    //console.log(req.session);
     res.sendStatus(200);
 });
 
