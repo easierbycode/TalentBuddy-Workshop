@@ -106,7 +106,7 @@ app.post('/api/tweets',ensureAuthentication(), function(req, res) {
         if (err) {
             return res.status(500).json('Error occurred');
         }
-        res.json({tweet: newTweet});
+        res.json({tweet: newTweet.toClient()});
     });
 
 });
