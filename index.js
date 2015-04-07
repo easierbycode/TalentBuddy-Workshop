@@ -95,7 +95,7 @@ app.post('/api/users', function(req, res)  {
 });
 
 
-app.post('/api/tweets',ensureAuthentication(), function(req, res) {
+app.post('/api/tweets', ensureAuthentication(), function(req, res) {
     var Tweet = conn.model('Tweet');
     var newTweet = new Tweet({
         text: req.body.tweet.text,
@@ -112,13 +112,18 @@ app.post('/api/tweets',ensureAuthentication(), function(req, res) {
 });
 
 app.get('/api/tweets/:tweetId', function(req, res) {
-    var tweet = _.find(fixtures.tweets, 'id', req.params.tweetId);
+    var Tweet = conn.model('Tweet');
+    var searchTweet =  req.params.tweetId;
 
-    if (!tweet) {
-        return res.sendStatus(404);
-    }
-
-    res.send({ tweet: tweet });
+    Tweet.findById(searchTweet, function(err, tweet) {
+        if (err) {
+            return res.status(500).json({error: 'Error occurred'});
+        }
+        if(!tweet) {
+            return res.sendStatus(404);
+        }
+        res.json({ tweet: tweet.toClient()});
+    });
 
 });
 
