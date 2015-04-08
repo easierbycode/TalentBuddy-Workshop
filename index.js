@@ -39,15 +39,23 @@ var ensureAuthentication = function() {
 
 
 app.get('/api/tweets', function(req, res){
+    var Tweet = conn.model('Tweet');
     if(!req.query.userId) {
         return res.sendStatus(400);
     }
-    var tweets = _.where(fixtures.tweets, { userId: req.query.userId });
-    var sortedTweets = tweets.sort(function(a, b) {
-        return b.created - a.created;
+    Tweet.find({ userId: req.query.userId}, null, {sort: { created: -1 } }, function(err, tweet) {
+        if (err) {
+            return res.status(500).json({err: 'Error occurred'});
+        }
+        res.json({ tweets: tweet.map(function(mapTweet) {
+            return {
+                text: mapTweet.text,
+                created: mapTweet.created,
+                id: mapTweet._id,
+                userId: mapTweet.userId
+            };
+        })});
     });
-    res.send({tweets: sortedTweets});
-
 });
 
 app.get('/api/users/:userId', function(req, res) {

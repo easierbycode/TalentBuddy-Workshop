@@ -1,4 +1,5 @@
-var mongoose = require('mongoose'),
+var _        = require('lodash'),
+    mongoose = require('mongoose'),
     Schema   = mongoose.Schema;
 
 var tweetSchema = new Schema({
@@ -10,10 +11,10 @@ var tweetSchema = new Schema({
 // assign a function to the "methods" object of our twitterlSchema
 
 tweetSchema.methods.toClient = function() {
-    var tweet = this.toObject();
-    tweet.id = tweet._id;
-    delete tweet._id;
-    delete tweet.__v;
+
+    var tweet = _.pick(this, ['userId', 'created', 'text']);
+    tweet.id = this._id;
+
     return tweet;
 };
 
