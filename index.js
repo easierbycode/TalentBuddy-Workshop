@@ -47,10 +47,8 @@ app.get('/api/tweets', function(req, res){
         if (err) {
             return res.sendStatus(500);
         }
-        res.json({ tweets: tweets.map(function(mapTweet) {
-            return {
-                tweets.toClient()
-            };
+        res.json({ tweets: tweets.map(function(tweet) {
+          return tweet.toClient();
         })});
     });
 });
