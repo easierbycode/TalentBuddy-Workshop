@@ -134,13 +134,16 @@ app.get('/api/tweets/:tweetId', function(req, res) {
 
 app.delete('/api/tweets/:tweetId', ensureAuthentication(), function(req, res) {
     var Tweet = conn.model('Tweet');
-    Tweet.findByIdAndRemove(req.params.tweetId, function(err, tweet) {
-        if(tweet.userId !== req.user.id) {
-            return res.sendStatus(403);
-        }
+    var searchTweet = req.params.tweetId;
+
+    Tweet.findByIdAndRemove(searchTweet, function(err, tweet) {
         if(!tweet) {
             return res.sendStatus(404);
         }
+        if(req.user.id !== tweet.userId) {
+            return res.sendStatus(403);
+        }
+
         res.sendStatus(200);
     });
 });
