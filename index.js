@@ -136,15 +136,21 @@ app.delete('/api/tweets/:tweetId', ensureAuthentication(), function(req, res) {
     var Tweet = conn.model('Tweet');
     var searchTweet = req.params.tweetId;
 
-    Tweet.findByIdAndRemove(searchTweet, function(err, tweet) {
+    // I'll change this
+    Tweet.findById({ _id: searchTweet }, function(err, tweet) {
         if(!tweet) {
             return res.sendStatus(404);
         }
         if(req.user.id !== tweet.userId) {
             return res.sendStatus(403);
+        } else {
+            tweet.remove(function(err) {
+                if (err) {
+                    return err;
+                }
+                res.sendStatus(200);
+            });
         }
-
-        res.sendStatus(200);
     });
 });
 
