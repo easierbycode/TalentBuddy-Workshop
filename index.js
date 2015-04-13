@@ -138,7 +138,17 @@ app.get('/api/tweets/:tweetId', function(req, res) {
 
 
 app.delete('/api/tweets/:tweetId', ensureAuthentication(), function(req, res) {
-    var pendtweet = _.find(fixtures.tweets, 'id', req.params.tweetId);
+    var Tweet = conn.model('Tweet');
+    Tweet.findByIdAndRemove(req.params.tweetId, function(err, tweet) {
+        if(tweet.userId !== req.user.id) {
+            return res.sendStatus(403);
+        }
+        if(!tweet) {
+            return res.sendStatus(404);
+        }
+        res.sendStatus(200);
+    });
+    /*var pendtweet = _.find(fixtures.tweets, 'id', req.params.tweetId);
     if(pendtweet.length === 0) {
         return res.sendStatus(404);
     }
@@ -146,7 +156,7 @@ app.delete('/api/tweets/:tweetId', ensureAuthentication(), function(req, res) {
         _.remove(fixtures.tweets, 'id', pendtweet.id);
         return res.sendStatus(200);
     }
-    return res.sendStatus(403);
+    return res.sendStatus(403);*/
 });
 
 app.post('/api/auth/login', function(req, res) {
