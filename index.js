@@ -43,17 +43,12 @@ app.get('/api/tweets', function(req, res){
     if(!req.query.userId) {
         return res.sendStatus(400);
     }
-    Tweet.find({ userId: req.query.userId}, null, {sort: { created: -1 } }, function(err, tweet) {
+    Tweet.find({ userId: req.query.userId}, null, {sort: { created: -1 } }, function(err, tweets) {
         if (err) {
-            return res.status(500).json({err: 'Error occurred'});
+            return res.sendStatus(500);
         }
-        res.json({ tweets: tweet.map(function(mapTweet) {
-            return {
-                text: mapTweet.text,
-                created: mapTweet.created,
-                id: mapTweet._id,
-                userId: mapTweet.userId
-            };
+        res.json({ tweets: tweets.map(function(tweet) {
+          return tweet.toClient();
         })});
     });
 });
@@ -148,15 +143,6 @@ app.delete('/api/tweets/:tweetId', ensureAuthentication(), function(req, res) {
         }
         res.sendStatus(200);
     });
-    /*var pendtweet = _.find(fixtures.tweets, 'id', req.params.tweetId);
-    if(pendtweet.length === 0) {
-        return res.sendStatus(404);
-    }
-    if(pendtweet.userId === req.user.id) {
-        _.remove(fixtures.tweets, 'id', pendtweet.id);
-        return res.sendStatus(200);
-    }
-    return res.sendStatus(403);*/
 });
 
 app.post('/api/auth/login', function(req, res) {
@@ -189,4 +175,3 @@ var server = app.listen(config.get('server:port'), config.get('server:host'));
 
 
 module.exports = server;
-
