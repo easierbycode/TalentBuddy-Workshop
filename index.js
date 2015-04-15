@@ -10,6 +10,7 @@ var express      = require('express'),
     passport     = require('./auth'),
     conn         = require('./db');
 
+var ensureAuthentication = require('./middleware/ensureAuthentication');
 
 var app    = express();
 
@@ -25,18 +26,6 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-
-var ensureAuthentication = function() {
-    return function auth(req, res, next) {
-        if (!req.isAuthenticated()) {
-            return res.sendStatus(403);
-        }
-        next();
-    };
-
-};
-
 
 app.get('/api/tweets', function(req, res){
     var Tweet = conn.model('Tweet');
