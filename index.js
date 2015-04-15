@@ -1,11 +1,8 @@
-
+'use strict';
 
 var express      = require('express'),
     config       = require('./config'),
-    session      = require('express-session'),
     fixtures     = require('./fixtures'),
-    bodyParser   = require('body-parser'),
-    cookieParser = require('cookie-parser'),
     _            = require('lodash'),
     passport     = require('./auth'),
     conn         = require('./db');
@@ -14,18 +11,9 @@ var ensureAuthentication = require('./middleware/ensureAuthentication');
 
 var app    = express();
 
+//Set up middleware
 
-
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
+require('./middleware')(app);
 
 app.get('/api/tweets', function(req, res){
     var Tweet = conn.model('Tweet');
