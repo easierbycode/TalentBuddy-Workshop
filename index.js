@@ -1,161 +1,17 @@
 'use strict';
 
 var express      = require('express'),
-    config       = require('./config'),
-    fixtures     = require('./fixtures'),
-    _            = require('lodash'),
-    passport     = require('./auth'),
-    conn         = require('./db');
-
-var ensureAuthentication = require('./middleware/ensureAuthentication');
+    config       = require('./config');
 
 var app    = express();
 
 //Set up middleware
 
 require('./middleware')(app);
+require('./router')(app);
 
-app.get('/api/tweets', function(req, res){
-    var Tweet = conn.model('Tweet');
-    if(!req.query.userId) {
-        return res.sendStatus(400);
-    }
-    Tweet.find({ userId: req.query.userId}, null, {sort: { created: -1 } }, function(err, tweets) {
-        if (err) {
-            return res.sendStatus(500);
-        }
-        res.json({ tweets: tweets.map(function(tweet) {
-          return tweet.toClient();
-        })});
-    });
-});
-
-app.get('/api/users/:userId', function(req, res) {
-    var userId = req.params.userId,
-        User   = conn.model('User');
-
-    User.findOne({id: userId}, function(err, user) {
-        if (!user) {
-            return res.sendStatus(404);
-        }
-        res.status(200).json({ user: user});
-    });
-});
-
-
-app.put('/api/users/:userId', ensureAuthentication(), function(req, res) {
-    var User   = conn.model('User');
-    if (req.user.id !== req.params.userId) {
-        return res.sendStatus(403);
-    }
-    User.findOneAndUpdate({ id: req.params.userId }, { password: req.body.password }, function(err, user) {
-        console.log(user);
-        return res.sendStatus(200);
-    });
-});
-
-app.post('/api/users', function(req, res)  {
-    var newUser = req.body.user;
-    var User   =  conn.model('User');
-
-    User.create(newUser, function(err, newUser) {
-        if (err) {
-            var code = err.code === 11000 ? 409 : 500;
-            return res.sendStatus(code);
-        }
-        req.login(newUser, function(err) {
-            if (err) {
-                return res.sendStatus(500);
-            }
-
-            res.sendStatus(200);
-            console.log(newUser);
-        });
-    });
-
-});
-
-
-app.post('/api/tweets', ensureAuthentication(), function(req, res) {
-    var Tweet = conn.model('Tweet');
-    var newTweet = new Tweet({
-        text: req.body.tweet.text,
-        created : Date.now() / 1000 | 0,
-        userId : req.user.id
-    });
-    newTweet.save(function(err, newTweet) {
-        if (err) {
-            return res.status(500).json('Error occurred');
-        }
-        res.json({tweet: newTweet.toClient()});
-    });
-
-});
-
-app.get('/api/tweets/:tweetId', function(req, res) {
-    var Tweet = conn.model('Tweet');
-    var searchTweet =  req.params.tweetId;
-
-    Tweet.findById(searchTweet, function(err, tweet) {
-        if (err) {
-            return res.status(500).json({error: 'Error occurred'});
-        }
-        if(!tweet) {
-            return res.sendStatus(404);
-        }
-        res.json({ tweet: tweet.toClient()});
-    });
-
-});
-
-
-
-app.delete('/api/tweets/:tweetId', ensureAuthentication(), function(req, res) {
-    var Tweet = conn.model('Tweet');
-    var searchTweet = req.params.tweetId;
-
-    // I'll change this
-    Tweet.findById({ _id: searchTweet }, function(err, tweet) {
-        if(!tweet) {
-            return res.sendStatus(404);
-        }
-        if(req.user.id !== tweet.userId) {
-            return res.sendStatus(403);
-        } else {
-            tweet.remove(function(err) {
-                if (err) {
-                    return err;
-                }
-                res.sendStatus(200);
-            });
-        }
-    });
-});
-
-app.post('/api/auth/login', function(req, res) {
-    passport.authenticate('local', function(err, user, info) {
-        if(err) {
-            return res.sendStatus(500);
-        }
-        if(info) {
-            return res.sendStatus(403);
-        }
-        req.login(user, function(err) {
-            if (err) {
-                return res.sendStatus(500);
-            }
-            return res.send({ user: user });
-        });
-    })(req, res);
-});
-
-app.post('/api/auth/logout', function(req, res) {
-    req.logout();
-    res.sendStatus(200);
-});
-
-
-
+var r = require('./router/routes/user');
+console.log(r);
 var server = app.listen(config.get('server:port'), config.get('server:host'));
 
 
