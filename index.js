@@ -10,11 +10,6 @@ var app    = express();
 require('./middleware')(app);
 require('./router')(app);
 
-var r = require('./router/routes/user');
-console.log(r);
 var server = app.listen(config.get('server:port'), config.get('server:host'));
-
-
-
 
 module.exports = server;

@@ -15,10 +15,32 @@ router.get('/:userId', function(req, res) {
         if (!user) {
             return res.sendStatus(404);
         }
-        res.status(200).json({ user: user});
+        res.status(200).json({ user: user.toClient() });
     });
 });
 
+router.post('/:userId/follow', ensureAuthentication(), function(req, res) {
+    var userId = req.params.userId;
+    var User   = conn.model('User');
+    if (!userId) {
+        return res.sendStatus(403);
+    }
+    User.findOne({ id: userId}, function(err, user) {
+        if (err) {
+            return res.sendStatus(500);
+        }
+        if(!user) {
+            return res.sendStatus(403);
+        } else {
+            User.findOneAndUpdate({ id : req.user.id }, { $addToSet: { followingIds: userId }  }, function(err) {
+                if (err) {
+                    return err;
+                }
+                return res.sendStatus(200);
+            });
+        }
+    });
+});
 
 router.put('/:userId', ensureAuthentication(), function(req, res) {
     var User   = conn.model('User');
