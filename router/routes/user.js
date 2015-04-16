@@ -20,6 +20,7 @@ router.get('/:userId', function(req, res) {
 });
 
 router.post('/:userId/follow', ensureAuthentication(), function(req, res) {
+    //I'll change this
     var userId = req.params.userId;
     var User   = conn.model('User');
     if (!userId) {
@@ -32,7 +33,31 @@ router.post('/:userId/follow', ensureAuthentication(), function(req, res) {
         if(!user) {
             return res.sendStatus(403);
         } else {
-            User.findOneAndUpdate({ id : req.user.id }, { $addToSet: { followingIds: userId }  }, function(err) {
+            User.findOneAndUpdate({ id : req.user.id }, { $addToSet: { followingIds: userId }  }, function(err, user) {
+                if (err) {
+                    return err;
+                }
+                return res.sendStatus(200);
+            });
+        }
+    });
+});
+
+router.post('/:userId/unfollow', ensureAuthentication(), function(req, res) {
+    //I'll change this
+    var userId = req.params.userId;
+    var User   = conn.model('User');
+    if (!userId) {
+        return res.sendStatus(403);
+    }
+    User.findOne({ id: userId}, function(err, user) {
+        if (err) {
+            return res.sendStatus(500);
+        }
+        if(!user) {
+            return res.sendStatus(403);
+        } else {
+            User.findOneAndUpdate({ id : req.user.id }, { $pull: { followingIds: userId }  }, function(err) {
                 if (err) {
                     return err;
                 }
