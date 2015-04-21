@@ -1,6 +1,7 @@
 
 
-var express  = require('express'),
+var _        = require('lodash'),
+    express  = require('express'),
     conn     = require('../../db'),
     router  =  express.Router();
 
@@ -97,6 +98,23 @@ router.post('/', function(req, res)  {
         });
     });
 
+});
+
+router.get('/:userId/friends', function(req, res) {
+    var User = conn.model('User');
+    User.findOne({ id: req.params.userId }, function(err, user) {
+        if(!user) {
+            return res.sendStatus(404);
+        }
+        followUserId = user.followingIds;
+        User.find({
+            'id' : { $in: followUserId }
+        }, function(err, users) {
+            return res.json({ users: users.map(function(user) {
+                return user.toClient();
+            })});
+        });
+    });
 });
 
 module.exports = router;
