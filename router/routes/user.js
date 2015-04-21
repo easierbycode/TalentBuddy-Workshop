@@ -117,4 +117,16 @@ router.get('/:userId/friends', function(req, res) {
     });
 });
 
+router.get('/:userId/followers', function(req, res) {
+    var User = conn.model('User');
+    User.find({ followingIds: req.params.userId }, function(err, users){
+        if(_.isEmpty(users)) {
+            return res.sendStatus(404);
+        }
+        res.json({ users: users.map(function(follower) {
+            return follower.toClient();
+        })});
+    });
+});
+
 module.exports = router;
