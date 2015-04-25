@@ -106,7 +106,7 @@ router.get('/:userId/friends', function(req, res) {
         if(!user) {
             return res.sendStatus(404);
         }
-        followUserId = user.followingIds;
+        var followUserId = user.followingIds;
         User.find({
             'id' : { $in: followUserId }
         }, function(err, users) {
