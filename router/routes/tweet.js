@@ -14,6 +14,9 @@ router.get('/', function(req, res){
     if(!query.stream) {
         return res.sendStatus(400);
     }
+    if(query.stream === 'profile_timeline' && !(query.userId)) {
+        return res.sendStatus(400);
+    }
     if(query.stream === 'profile_timeline' && query.userId) {
         Tweet.find({ userId: query.userId}, null, {sort: { created: -1}}, function(err, tweets) {
             if (err) {
