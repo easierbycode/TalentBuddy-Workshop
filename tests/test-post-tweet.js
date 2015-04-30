@@ -1,7 +1,8 @@
 'use strict';
 
 var request = require('supertest'),
-    mongodb = require('mongodb');
+    mongodb = require('mongodb'),
+    server  = null;
 
 process.env.NODE_ENV = 'test';
 
@@ -27,8 +28,19 @@ describe("Test suite POST /api/tweets", function() {
             }
         });
     });
+    var agent = null;
 
-    it("test case schenario 1", function(done) {
+    it(" POST /api/tweets responds with status code 403 when posting tweets from unauthenticated user", function(done) {
+        server = require('../index');
+        var Session = require('supertest-session')({
+            app: server
+        });
+        agent = new Session()
+        var tweet = { userId: 'aristodemo', text: 'Termopili'};
+        agent
+            .post('/api/tweets')
+            .send({tweet: tweet })
+            .expect(403);
         done();
     });
 
