@@ -40,8 +40,8 @@ describe("Test suite POST /api/tweets", function() {
         agent
             .post('/api/tweets')
             .send({tweet: tweet })
-            .expect(403);
-        done();
+            .expect(403, done);
+
     });
 
     it("test case scenario 2", function(done) {
