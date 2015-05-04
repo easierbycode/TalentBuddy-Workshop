@@ -28,14 +28,14 @@ describe("Test suite POST /api/tweets", function() {
             }
         });
     });
-    var agent = null;
+    var agentA = null;
 
     it(" POST /api/tweets responds with status code 403 when posting tweets from unauthenticated user", function(done) {
         server = require('../index');
         var Session = require('supertest-session')({
             app: server
         });
-        agent = new Session()
+        agentA = new Session()
         var tweet = { userId: 'aristodemo', text: 'Termopili'};
         agent
             .post('/api/tweets')
@@ -44,7 +44,11 @@ describe("Test suite POST /api/tweets", function() {
 
     });
 
-    it("test case scenario 2", function(done) {
-        done();
+    it('POST /api/users creates and authenticates user "test"', function(done) {
+        var testUser = { id: 'test', name: 'Test user', email: 'test@gmail.com', password: 'tester'};
+        agentA
+            .post('/api/users')
+            .send({ user: user })
+            .expect(200, done);
     });
 });
