@@ -2,6 +2,8 @@
 
 var request = require('supertest'),
     mongodb = require('mongodb'),
+    chai    = require('chai'),
+    expect  = chai.expect,
     server  = null;
 
 process.env.NODE_ENV = 'test';
@@ -36,8 +38,8 @@ describe("Test suite POST /api/tweets", function() {
             app: server
         });
         agentA = new Session()
-        var tweet = { userId: 'aristodemo', text: 'Termopili'};
-        agent
+        var tweet = { userId: 'test', text: 'Node.js in Action'};
+        agentA
             .post('/api/tweets')
             .send({tweet: tweet })
             .expect(403, done);
@@ -48,7 +50,22 @@ describe("Test suite POST /api/tweets", function() {
         var testUser = { id: 'test', name: 'Test user', email: 'test@gmail.com', password: 'tester'};
         agentA
             .post('/api/users')
-            .send({ user: user })
+            .send({ user: testUser })
             .expect(200, done);
+    });
+
+    it('POST /api/tweets with body { text: "Node.js in Action" stores test\'s tweet', function(done) {
+        var dataTweet = { text: 'Node.js in Action'};
+        agentA
+            .post('/api/tweets')
+            .send({ tweet: dataTweet })
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    return done(err);
+                }
+                expect(res.body.tweet, 'Your response is wrong').to.have.property('id')
+                done()
+            });
     });
 });
